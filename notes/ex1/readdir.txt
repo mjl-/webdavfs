@@ -1,0 +1,64 @@
+PROPFIND /dav/ HTTP/1.1
+Host: localhost:8000
+Depth: 1
+Connection: close
+Content-Type: application/xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<propfind xmlns="DAV:"><prop>
+<getcontentlength xmlns="DAV:"/>
+<getlastmodified xmlns="DAV:"/>
+<executable xmlns="http://apache.org/dav/props/"/>
+<resourcetype xmlns="DAV:"/>
+<checked-in xmlns="DAV:"/>
+<checked-out xmlns="DAV:"/>
+</prop></propfind>
+HTTP/1.1 207 Multi-status
+Connection: close
+Content-Type: text/xml; charset="utf-8"
+Content-Length: 2541
+Date: Thu, 23 Aug 2007 14:34:00 GMT
+Server: lighttpd/1.4.13
+
+<?xml version="1.0" encoding="utf-8"?>
+<D:multistatus xmlns:D="DAV:" xmlns:ns0="urn:uuid:c2f41010-65b3-11d1-a29f-00aa00c14882/">
+<D:response>
+<D:href>http://localhost:8000/dav/</D:href>
+<D:propstat>
+<D:prop>
+<D:creationdate ns0:dt="dateTime.tz">2007-08-23T14:32:19Z</D:creationdate><D:getcontentlanguage>en</D:getcontentlanguage><D:getcontentlength>512</D:getcontentlength><D:getcontenttype>httpd/unix-directory</D:getcontenttype><D:getlastmodifiedns0:dt="dateTime.rfc1123">Thu, 23 Aug 2007 14:32:19 GMT</D:getlastmodified><D:resourcetype><D:collection/></D:resourcetype></D:prop><D:status>HTTP/1.1 200 OK</D:status>
+</D:propstat>
+</D:response>
+<D:response>
+<D:href>http://localhost:8000/dav/oink</D:href>
+<D:propstat>
+<D:prop>
+<D:creationdate ns0:dt="dateTime.tz">2007-08-23T14:23:09Z</D:creationdate><D:getcontentlanguage>en</D:getcontentlanguage><D:getcontentlength>28</D:getcontentlength><D:getlastmodified ns0:dt="dateTime.rfc1123">Thu, 23 Aug 2007 14:23:09 GMT</D:getlastmodified></D:prop>
+<D:status>HTTP/1.1 200 OK</D:status>
+</D:propstat>
+</D:response>
+<D:response>
+<D:href>http://localhost:8000/dav/oink2</D:href>
+<D:propstat>
+<D:prop>
+<D:creationdate ns0:dt="dateTime.tz">2007-08-23T13:51:05Z</D:creationdate><D:getcontentlanguage>en</D:getcontentlanguage><D:getcontentlength>0</D:getcontentlength><D:getlastmodified ns0:dt="dateTime.rfc1123">Thu, 23 Aug 2007 13:51:05 GMT</D:getlastmodified></D:prop>
+<D:status>HTTP/1.1 200 OK</D:status>
+</D:propstat>
+</D:response>
+<D:response>
+<D:href>http://localhost:8000/dav/blah</D:href>
+<D:propstat>
+<D:prop>
+<D:creationdate ns0:dt="dateTime.tz">2007-08-23T13:51:36Z</D:creationdate><D:getcontentlanguage>en</D:getcontentlanguage><D:getcontentlength>512</D:getcontentlength><D:getcontenttype>httpd/unix-directory</D:getcontenttype><D:getlastmodifiedns0:dt="dateTime.rfc1123">Thu, 23 Aug 2007 13:51:36 GMT</D:getlastmodified><D:resourcetype><D:collection/></D:resourcetype></D:prop>
+<D:status>HTTP/1.1 200 OK</D:status>
+</D:propstat>
+</D:response>
+<D:response>
+<D:href>http://localhost:8000/dav/mydir</D:href>
+<D:propstat>
+<D:prop>
+<D:creationdate ns0:dt="dateTime.tz">2007-08-23T14:32:19Z</D:creationdate><D:getcontentlanguage>en</D:getcontentlanguage><D:getcontentlength>512</D:getcontentlength><D:getcontenttype>httpd/unix-directory</D:getcontenttype><D:getlastmodifiedns0:dt="dateTime.rfc1123">Thu, 23 Aug 2007 14:32:19 GMT</D:getlastmodified><D:resourcetype><D:collection/></D:resourcetype></D:prop>
+<D:status>HTTP/1.1 200 OK</D:status>
+</D:propstat>
+</D:response>
+</D:multistatus>

@@ -1,0 +1,19 @@
+<../../mkconfig
+
+TARG=\
+	webdavfs.dis\
+
+SYSMODULES=\
+	arg.m\
+	bufio.m\
+	daytime.m\
+	draw.m\
+	keyring.m\
+	string.m\
+	sys.m\
+	security.m\
+	mhttp.m\
+
+DISBIN=$ROOT/dis
+
+<$ROOT/mkfiles/mkdis

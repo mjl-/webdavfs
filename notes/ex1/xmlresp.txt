@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<D:multistatus xmlns:D="DAV:" xmlns:ns0="urn:uuid:c2f41010-65b3-11d1-a29f-00aa00c14882/">
+<D:response>
+<D:href>http://localhost:8000/dav/</D:href>
+<D:propstat>
+<D:prop>
+<D:creationdate ns0:dt="dateTime.tz">2007-08-23T14:37:54Z</D:creationdate><D:getcontentlanguage>en</D:getcontentlanguage><D:getcontentlength>512</D:getcontentlength><D:getcontenttype>httpd/unix-directory</D:getcontenttype><D:getlastmodified ns0:dt="dateTime.rfc1123">Thu, 23 Aug 2007 14:37:54 GMT</D:getlastmodified><D:resourcetype><D:collection/></D:resourcetype></D:prop>
+<D:status>HTTP/1.1 200 OK</D:status>
+</D:propstat>
+</D:response>
+</D:multistatus>

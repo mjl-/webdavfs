@@ -1,0 +1,29 @@
+xml hierarchy of a multistatus response with properties.
+
+tag multistatus
+	tag response
+		tag href
+			text path
+		tag propstat
+			tag prop
+				tag resourcetype
+					tag collection
+				tag getcontenttype
+					text httpd/unix-directory
+				tag creationdate
+					text 2007-08-20T16:23:26Z
+				tag getlastmodified
+					text Mon, 20 Aug 2007 16:23:26 GMT
+				tag getcontentlength
+					text 4096
+				tag mode
+					text 711
+				tag uid
+					text 445730
+				tag gid
+					text 30
+			tag status
+				text HTTP/1.1 200 OK
+	tag response
+		
+	...

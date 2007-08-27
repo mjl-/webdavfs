@@ -1,0 +1,18 @@
+GET /dav/oink HTTP/1.1
+Host: localhost:8000
+Range: bytes=0-2
+Connection: close
+
+HTTP/1.1 206 Partial Content
+Connection: close
+Content-Type: application/octet-stream
+ETag: "892198317"
+Accept-Ranges: bytes
+Last-Modified: Thu, 23 Aug 2007 14:23:09 GMT
+Content-Range: bytes 0-2/28
+Content-Length: 3
+Date: Thu, 23 Aug 2007 14:30:25 GMT
+Server: lighttpd/1.4.13
+
+blaConnection closed by foreign host.
+

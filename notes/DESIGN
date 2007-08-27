@@ -1,0 +1,33 @@
+attach
+	stat remote root directory, fail if it doesn't exist.
+open
+	nothing special, perhaps fail if directory is being opened for writing...  ORCLOSE is bad, error out for it.  OTRUNC is handled by an empty put first.
+create
+	if file, put empty file
+	if directory, mkcol
+write
+	dir: error
+	file: put with Content-Range and data
+read
+	dir: propfind, depth: 1, props: creationdate,getcontentlenght,getlastmodified,resourcetype.  will keep readdir results in memory for next reads.
+	file: get with Range
+stat
+	propfind, depth: 0, props same as readdir
+wstat
+	not allowed, perhpas allow wstat length
+walk
+	".." cut off path elem and stat it.
+	stat (propfind) the path to check it is there.
+remove
+	delete
+clunk
+	nothing
+
+url <-> qid (remove qid on create or remove and assign new qid.  for op on absent qid return Estale or something)
+
+hope to ignore multiline reponses, and as much xml as possible.  will not be possible for readdir.
+
+properties -> stat info (PROPFIND, depth 0)
+collections -> readdir, walk (PROPFIND, depth 1)
+locking -> ignore?  or exclusive use
+namespace ops (copy/move) -> wstat of name, ignore others

@@ -1,0 +1,34 @@
+PROPFIND /dav/oink3 HTTP/1.1
+Host: localhost:8000
+Depth: 0
+Connection: close
+Content-Type: application/xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<propfind xmlns="DAV:"><prop>
+<getcontentlength xmlns="DAV:"/>
+<getlastmodified xmlns="DAV:"/>
+<executable xmlns="http://apache.org/dav/props/"/>
+<resourcetype xmlns="DAV:"/>
+<checked-in xmlns="DAV:"/>
+<checked-out xmlns="DAV:"/>
+</prop></propfind>
+HTTP/1.1 404 Not Found
+Connection: close
+Content-Type: text/html
+Content-Length: 345
+Date: Thu, 23 Aug 2007 14:42:34 GMT
+Server: lighttpd/1.4.13
+
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+ <head>
+  <title>404 - Not Found</title>
+ </head>
+ <body>
+  <h1>404 - Not Found</h1>
+ </body>
+</html>
+Connection closed by foreign host.

@@ -1,0 +1,14 @@
+PUT /dav/oink HTTP/1.1
+Host: localhost:8000
+Content-Range: bytes 10-12/*
+Content-Length: 2
+Connection: close
+
+ab
+HTTP/1.1 200 OK
+Connection: close
+Content-Length: 0
+Date: Thu, 23 Aug 2007 14:21:11 GMT
+Server: lighttpd/1.4.13
+
+Connection closed by foreign host.

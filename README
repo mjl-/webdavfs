@@ -1,0 +1,37 @@
+this is webdavfs, a styx/9p2000 file server that accesses files
+over http/webdav.  start it like so:
+
+	mount {webdavfs http://yourhost/rootpath/} /n/dav
+
+to install:
+first, get the http library webdavfs is using:
+
+	hg clone static-http://www.ueber.net/who/mjl/hg/http/
+
+and install it (see it's README).
+
+now make a "mkconfig" in the directory this README file is in
+(symlink/bind the one from your inferno install), and "mk install".
+
+get:
+this code is being kept up to date using mercurial (hg).  to get a
+fresh copy:
+
+	hg clone static-http://www.ueber.net/who/mjl/hg/webdavfs/
+
+i'll also keep a regularly updated copy on sources, in contrib/mjl/.
+
+licence:
+this code is in the public domain, written by mechiel lukkien, august 2007.
+
+
+testing:
+- test new http lib
+
+todo:
+- see if some stats can be avoided, lots of them are being done.
+- somehow fix the inferno ssl3 module, it currently reads until either all requested bytes are found or until eof, for keep-alive connections, this doesn't work.
+
+perhaps:
+- keep track of version number of file?  it would not detect remote writes anyway
+- use factotum to do auth.  at first, option for webdavfs to make it use factotum, best is to have httplib do it.
