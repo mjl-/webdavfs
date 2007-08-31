@@ -13,6 +13,7 @@ include "styxservers.m";
 include "daytime.m";
 include "filter.m";
 include "tables.m";
+include "factotum.m";
 include "mhttp.m";
 include "xml.m";
 
@@ -41,7 +42,7 @@ baseurl: ref Url;
 lastqid := 0;
 user: string;
 srv: ref Styxserver;
-authhdr: ref (string, string);
+keyspec: string;
 qdirtab:	ref Table[array of ref Sys->Dir];	# map qid.path -> directory contents
 quptab:		ref Table[string];	# map qid.path -> urlpath
 upqtab:		ref Strhash[ref Int];	# map urlpath -> qid.path
@@ -90,16 +91,15 @@ init(nil: ref Draw->Context, args: list of string)
 	PROPREQ = array of byte "<?xml version=\"1.0\" encoding=\"utf-8\"?><propfind xmlns=\"DAV:\"><prop><getcontentlength xmlns=\"DAV:\"/><getlastmodified xmlns=\"DAV:\"/><executable xmlns=\"http://apache.org/dav/props/\"/><resourcetype xmlns=\"DAV:\"/><checked-in xmlns=\"DAV:\"/><checked-out xmlns=\"DAV:\"/></prop></propfind>";
 
 	arg->init(args);
-	arg->setusage(arg->progname()+" [-Dcd] [-k user pass] url");
+	arg->setusage(arg->progname()+" [-Dcd] [-k keyspec] url");
 	while((c := arg->opt()) != 0)
 		case c {
 		'D' =>	styxservers->traceset(1);
 			http->debug++;
 		'c' =>	cflag++;
 		'd' =>	dflag++;
-		'k' =>	authhdr = ref http->basicauth(arg->earg(), arg->earg());
-		* =>	fprint(fildes(2), "bad option\n");
-			arg->usage();
+		'k' =>	keyspec = arg->earg();
+		* =>	arg->usage();
 		}
 	args = arg->argv();
 	if(len args != 1)
@@ -370,9 +370,6 @@ httpstat(up: string): (ref Sys->Dir, string)
 	req.body = PROPREQ;
 	req.h.set("Depth", "0");
 	req.h.set("Content-Type", "application/xml");
-	if(authhdr != nil)
-		req.h.set(authhdr.t0, authhdr.t1);
-
 	(fd, resp, err) := httptransact(req);
 	if(err != nil)
 		return (nil, err);
@@ -422,9 +419,6 @@ httpreaddir(up: string): (array of ref Sys->Dir, string)
 	req.body = PROPREQ;
 	req.h.set("Depth", "1");
 	req.h.set("Content-Type", "application/xml");
-	if(authhdr != nil)
-		req.h.set(authhdr.t0, authhdr.t1);
-
 	(fd, resp, err) := httptransact(req);
 	if(err != nil)
 		return (nil, err);
@@ -492,8 +486,6 @@ httperror(resp: ref Resp): string
 httpmove(up, newup: string): string
 {
 	req := mkreq(Http->MOVE, up);
-	if(authhdr != nil)
-		req.h.set(authhdr.t0, authhdr.t1);
 	req.h.set("Overwrite", "F");
 	newurl := ref *baseurl;
 	newurl.path = newup;
@@ -501,7 +493,6 @@ httpmove(up, newup: string): string
 	if(newurl.host == "localhost")	# xxx lighttpd doesn't know its port...
 		newurlstr = "http://localhost"+newurl.path;
 	req.h.set("Destination", newurlstr);
-
 	(fd, resp, err) := httptransact(req);
 	if(err != nil)
 		return err;
@@ -516,9 +507,6 @@ httpmove(up, newup: string): string
 httpdelete(up: string): string
 {
 	req := mkreq(Http->DELETE, up);
-	if(authhdr != nil)
-		req.h.set(authhdr.t0, authhdr.t1);
-
 	(fd, resp, err) := httptransact(req);
 	if(err != nil)
 		return err;
@@ -537,9 +525,6 @@ httpput(up: string, off: big, d: array of byte, userange: int): string
 	req.body = d;
 	if(userange)
 		req.h.set("Content-Range", sprint("bytes %bd-%bd/*", off, off+big len d-big 1));
-	if(authhdr != nil)
-		req.h.set(authhdr.t0, authhdr.t1);
-
 	(fd, resp, err) := httptransact(req);
 	if(err != nil)
 		return err;
@@ -555,9 +540,6 @@ httpput(up: string, off: big, d: array of byte, userange: int): string
 httpmkcol(up: string): string
 {
 	req := mkreq(Http->MKCOL, up);
-	if(authhdr != nil)
-		req.h.set(authhdr.t0, authhdr.t1);
-
 	(fd, resp, err) := httptransact(req);
 	if(err != nil)
 		return err;
@@ -574,9 +556,6 @@ httpget(up: string, off: big, count: int): (array of byte, string)
 {
 	req := mkreq(Http->GET, up);
 	req.h.set("Range", sprint("bytes=%bd-%bd", off, off+big (count-1)));
-	if(authhdr != nil)
-		req.h.set(authhdr.t0, authhdr.t1);
-
 	(fd, resp, err) := httptransact(req);
 	if(err != nil)
 		return (nil, err);
@@ -816,12 +795,17 @@ flushfd(fd: ref Sys->FD): string
 	return nil;
 }
 
+authhdr: ref (string, string);
+authtried := 0;
+
 httptransact(req: ref Req): (ref Sys->FD, ref Resp, string)
 {
 	err: string;
 	resp: ref Resp;
 	reusing := 1;
 	for(i := 0; i < 10; i++) {
+		if(authhdr != nil)
+			req.h.set(authhdr.t0, authhdr.t1);
 		if(cflag)
 			req.h.set("Connection", "close");
 		if(cflag || !reusing || !http->isidempotent(req.method) || hfd == nil || hb == nil) {
@@ -850,6 +834,25 @@ httptransact(req: ref Req): (ref Sys->FD, ref Resp, string)
 		}
 		if(err != nil)
 			return (nil, nil, err);
+		if(int resp.st == 401 && !authtried && ((nil, wwwauth) := resp.h.find("WWW-Authenticate")).t0) {
+			if(str->prefix("Basic", wwwauth)) {
+				f := load Factotum Factotum->PATH;
+				f->init();
+				(huser, hpass) := f->getuserpasswd(sprint("proto=pass server=%q service=httpbasic %s", baseurl.pack(), keyspec));
+				authtried = 1;
+				if(huser != nil || hpass != nil) {
+					authhdr = ref http->basicauth(huser, hpass);
+					continue;
+				}
+			} else {
+				(bfd, berr) := resp.body(hb);
+				if(berr != nil)
+					return (nil, nil, "reading body for redirect: "+berr);
+				if((err = flushfd(bfd)) != nil)
+					return (nil, nil, sprint("flushing http response body to /dev/null: %r"));
+				return (nil, nil, "unsupported http auth type: "+wwwauth);
+			}
+		}
 		if(req.method == Http->PROPFIND)
 			case int resp.st {
 			301 or 302 or 303 or 307 =>
