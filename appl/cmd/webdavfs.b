@@ -126,6 +126,7 @@ init(nil: ref Draw->Context, args: list of string)
 	msgc: chan of ref Tmsg;
 	(msgc, srv) = Styxserver.new(sys->fildes(0), nav, big 0);
 
+done:
 	for(;;) {
 		gm := <-msgc;
 		if(gm == nil)
@@ -133,7 +134,7 @@ init(nil: ref Draw->Context, args: list of string)
 		pick m := gm {
 		Readerror =>
 			warn("read error: "+m.error);
-			break;
+			break done;
 		* =>
 			dostyx(gm);
 		}
