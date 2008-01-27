@@ -689,7 +689,7 @@ mkurl(up: string): ref Url
 
 mkreq(method: int, up: string): ref Req
 {
-	return ref Req(method, mkurl(up), Http->HTTP_11, Hdrs.new(nil), nil, nil);
+	return Req.mk(method, mkurl(up), Http->HTTP_11, Hdrs.new(nil));
 }
 
 Stat.dir(s: self Stat, path: big): ref Sys->Dir
