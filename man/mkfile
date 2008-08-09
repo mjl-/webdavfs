@@ -1,8 +1,6 @@
 <../mkconfig
 
-MAN=
+MAN=\
+	4/webdavfs
 
 <mkman
-
-nuke:QV:
-	

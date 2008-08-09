@@ -1,0 +1,61 @@
+.TH WEBDAVFS 4
+.SH NAME
+webdavfs \- webdav file server
+.SH SYNOPSIS
+.B webdavfs
+[
+.B -Ddc
+] [
+.B -k
+.I keyspec
+]
+.I url
+.SH DESCRIPTION
+.I Webdavfs
+serves files exported by a WebDAV-supporting web server.
+.I Url
+is taken to be the root of the file system.  Only
+.I basic
+http authentication is currently supported (not
+.IR digest ).
+The username and password are requested from factotum with
+.I httpbasic
+as
+.I service
+and
+.I url
+as
+.IR server .
+.PP
+Http connections are reused for idempotent operations only.
+.PP
+Options:
+.TP
+.B -c
+Disables http connection reuse and makes
+.I webdavfs
+create a new connection for each http request.
+.TP
+.BI -k " keyspec"
+.I Keyspec
+is appended to key spec requested from factotum.
+.TP
+.B -D
+Enables printing traces of styx and http messages.
+.TP
+.B -d
+Enables printing of
+.I webdavfs
+debug messages.
+.SH EXAMPLES
+.EX
+mount {webdavfs -c https://webdisk.xs4all.nl/mechiel/} /n/dav
+.EE
+.SH BUGS
+Ssl connections do not work properly without
+.BR -c .
+The ssl library treats a
+.I read
+on the connection as a
+.I readn
+which does not work with the http library using Bufio for reading.

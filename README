@@ -34,4 +34,4 @@ todo:
 
 perhaps:
 - keep track of version number of file?  it would not detect remote writes anyway
-- use factotum to do auth.  at first, option for webdavfs to make it use factotum, best is to have httplib do it.
+- do http digest auth
