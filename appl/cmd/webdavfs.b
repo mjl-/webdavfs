@@ -82,10 +82,13 @@ init(nil: ref Draw->Context, args: list of string)
 	styxservers->init(styx);
 	daytime = load Daytime Daytime->PATH;
 	xml = load Xml Xml->PATH;
-	xml->init(bufio);
+	xml->init();
 	tables = load Tables Tables->PATH;
 	http = load Http Http->PATH;
 	http->init(bufio);
+
+	# ugly hackery to make xml properly initialise its bufio module instance
+	xml->open("/dev/null", nil, nil);
 
 	# readdir in xml...
 	PROPREQ = array of byte "<?xml version=\"1.0\" encoding=\"utf-8\"?><propfind xmlns=\"DAV:\"><prop><getcontentlength xmlns=\"DAV:\"/><getlastmodified xmlns=\"DAV:\"/><executable xmlns=\"http://apache.org/dav/props/\"/><resourcetype xmlns=\"DAV:\"/><checked-in xmlns=\"DAV:\"/><checked-out xmlns=\"DAV:\"/></prop></propfind>";
