@@ -2,6 +2,7 @@
 .SH NAME
 webdavfs \- webdav file server
 .SH SYNOPSIS
+mount {
 .B webdavfs
 [
 .B -Ddc
@@ -10,6 +11,7 @@ webdavfs \- webdav file server
 .I keyspec
 ]
 .I url
+} mtpt
 .SH DESCRIPTION
 .I Webdavfs
 serves files exported by a WebDAV-supporting web server.

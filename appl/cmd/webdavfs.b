@@ -117,7 +117,7 @@ init(nil: ref Draw->Context, args: list of string)
 		baseurl.path += "/";
 
 	user = readuser();
-	nilint = ref Int(-1);;
+	nilint = ref Int(-1);
 	qdirtab = qdirtab.new(256, nil);
 	quptab = quptab.new(256, nil);
 	upqtab = upqtab.new(256, nilint);
@@ -142,7 +142,6 @@ done:
 			dostyx(gm);
 		}
 	}
-	warn("quiting");
 }
 
 findurlpath(m: ref Tmsg, fid: int): string
