@@ -19,6 +19,9 @@ first, ensure a "mkconfig" file is present.  a bind/symlink to the
 mkconfig of your inferno install should do.  now "mk" and "mk
 install" to compile and install the files.
 
+when building from within inferno, insert SYSHOST=Inferno and ROOT=
+in the mk invocations to override the values in the mkconfig.
+
 
 # licence & author
 
@@ -34,6 +37,7 @@ reachable at mechiel@ueber.net or mechiel@xs4all.nl.
 # todo:
 
 - see if some stats can be avoided, lots of them are being done.
+  first try to get rid of the navigator.
 - somehow fix the inferno ssl3 module, it currently reads until
   either all requested bytes are found or until eof, for keep-alive
   connections, this doesn't work.

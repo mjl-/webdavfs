@@ -1,36 +1,40 @@
 implement Webdavfs;
 
 include "sys.m";
+	sys: Sys;
+	sprint: import sys;
 include "draw.m";
 include "arg.m";
 include "bufio.m";
 	bufio: Bufio;
 	Iobuf: import bufio;
 include "string.m";
+	str: String;
 include "styx.m";
+	styx: Styx;
 	Tmsg, Rmsg: import Styx;
 include "styxservers.m";
+	styxservers: Styxservers;
+	Styxserver, Fid, Navigator, Navop: import styxservers;
 include "daytime.m";
+	daytime: Daytime;
 include "filter.m";
 include "tables.m";
+	tables: Tables;
+	Table, Strhash: import tables;
 include "factotum.m";
 include "mhttp.m";
+	http: Http;
+	Url, Hdrs, Req, Resp: import http;
 include "xml.m";
+	xml: Xml;
+	Parser, Locator, Attributes: import xml;
 
-sys: Sys;
-str: String;
-styx: Styx;
-styxservers: Styxservers;
-daytime: Daytime;
-http: Http;
-tables: Tables;
-xml: Xml;
 
-print, sprint, fprint, fildes: import sys;
-Styxserver, Fid, Navigator, Navop: import styxservers;
-Parser, Locator, Attributes: import xml;
-Table, Strhash: import tables;
-Url, Hdrs, Req, Resp: import http;
+Webdavfs: module {
+	init:	fn(nil: ref Draw->Context, args: list of string);
+};
+
 
 Estale:		con "stale fid";
 Edirnotempty:	con "directory not empty";
@@ -39,15 +43,18 @@ Eexists, Enotdir, Eperm, Enotfound, Ebadfid, Emode, Ebadarg: import Styxservers;
 
 cflag, dflag: int;
 baseurl: ref Url;
+keyspec: string;
+
 lastqid := 0;
 user: string;
 srv: ref Styxserver;
-keyspec: string;
-qdirtab:	ref Table[array of ref Sys->Dir];	# map qid.path -> directory contents
-quptab:		ref Table[string];	# map qid.path -> urlpath
-upqtab:		ref Strhash[ref Int];	# map urlpath -> qid.path
-OVERWRITE, USERANGE: con iota;
+
+qdirtab: ref Table[array of ref Sys->Dir];	# map qid.path -> directory contents
+quptab: ref Table[string];	# map qid.path -> urlpath
+upqtab: ref Strhash[ref Int];	# map urlpath -> qid.path
+
 PROPREQ: array of byte;
+Overwrite, Userange: con iota;
 
 Int: adt {
 	i:	int;
@@ -65,10 +72,6 @@ Stat: adt {
 	dir:	fn(s: self Stat, path: big): ref Sys->Dir;
 };
 zerostat := Stat("", 0, 0, big -1, -1, nil);
-
-Webdavfs: module {
-	init:	fn(nil: ref Draw->Context, args: list of string);
-};
 
 init(nil: ref Draw->Context, args: list of string)
 {
@@ -177,7 +180,7 @@ dostyx(gm: ref Tmsg)
 		if(m.mode & (Sys->ORCLOSE|Sys->OEXCL))
 			return replyerror(m, Emode);
 		if(m.mode & Sys->OTRUNC) {
-			err := httpput(up, big 0, array[0] of byte, OVERWRITE);
+			err := httpput(up, big 0, array[0] of byte, Overwrite);
 			if(err != nil)
 				return replyerror(m, err);
 		}
@@ -193,7 +196,7 @@ dostyx(gm: ref Tmsg)
 		if(m.perm & Sys->DMDIR)
 			err = httpmkcol(newup);
 		else
-			err = httpput(newup, big 0, array[0] of byte, OVERWRITE);
+			err = httpput(newup, big 0, array[0] of byte, Overwrite);
 		if(err != nil)
 			return replyerror(m, err);
 		nqidpath := lastqid++;
@@ -212,9 +215,9 @@ dostyx(gm: ref Tmsg)
 			return replyerror(m, err);
 		if((up := findurlpath(m, m.fid)) == nil)
 			return;
-		userange := USERANGE;
+		userange := Userange;
 		if(m.offset == big 0 && len m.data == 0)
-			userange = OVERWRITE;
+			userange = Overwrite;
 		err = httpput(up, m.offset, m.data, userange);
 		if(err != nil)
 			return replyerror(m, err);
@@ -440,9 +443,10 @@ httpreaddir(up: string): (array of ref Sys->Dir, string)
 	dirs := array[len stats-1] of ref Sys->Dir;
 	for(i := 1; i < len stats; i++)
 		case stats[i].status.t1 {
-		"404" =>		return (nil, Enotfound);
-		"401" or "403" =>	return (nil, Eperm);
-		* =>			return (nil, sprint("%s (%s)", stats[i].status.t1, stats[i].status.t0));
+		"404" =>	return (nil, Enotfound);
+		"401" or
+		"403" =>	return (nil, Eperm);
+		* =>		return (nil, sprint("%s (%s)", stats[i].status.t1, stats[i].status.t0));
 		"200" =>
 			if(!urlpatheq(walkup(stats[i].href), up))
 				return (nil, Ebadstat);
@@ -480,10 +484,11 @@ urlpatheq(href, up: string): int
 httperror(resp: ref Resp): string
 {
 	case resp.st {
-	"403" or "401" =>	return Eperm;
-	"404" =>		return Enotfound;
-	* =>			return sprint("%s (%s)", resp.stmsg, resp.st);
+	"403" or
+	"401" =>	return Eperm;
+	"404" =>	return Enotfound;
 	}
+	return sprint("%s (%s)", resp.stmsg, resp.st);
 }
 
 httpmove(up, newup: string): string
@@ -501,10 +506,11 @@ httpmove(up, newup: string): string
 		return err;
 	flushfd(fd);
 
-	case resp.st{
-	"201" or "204" =>	return nil;
-	* =>	return httperror(resp);
+	case resp.st {
+	"201" or
+	"204" =>	return nil;
 	}
+	return httperror(resp);
 }
 
 httpdelete(up: string): string
@@ -516,10 +522,11 @@ httpdelete(up: string): string
 	flushfd(fd);
 
 	case resp.st {
-	"200" or "202" or "204" =>
-		return nil;
-	* =>	return httperror(resp);
+	"200" or
+	"202" or
+	"204" =>	return nil;
 	}
+	return httperror(resp);
 }
 
 httpput(up: string, off: big, d: array of byte, userange: int): string
@@ -534,10 +541,12 @@ httpput(up: string, off: big, d: array of byte, userange: int): string
 	flushfd(fd);
 
 	case resp.st {
-	"200" or "201" or "204" =>
+	"200" or
+	"201" or
+	"204" =>
 		return nil;
-	* =>	return httperror(resp);
 	}
+	return httperror(resp);
 }
 
 httpmkcol(up: string): string
@@ -550,9 +559,9 @@ httpmkcol(up: string): string
 
 	case resp.st {
 	"405" =>	return Eexists;
-	* =>		return httperror(resp);
 	"201" =>	return nil;
 	}
+	return httperror(resp);
 }
 
 httpget(up: string, off: big, count: int): (array of byte, string)
@@ -564,15 +573,15 @@ httpget(up: string, off: big, count: int): (array of byte, string)
 		return (nil, err);
 
 	case resp.st {
-	* =>
-		flushfd(fd);
-		return (nil, httperror(resp));
-	"200" or "206" =>
+	"200" or
+	"206" =>
 		return readfd(fd);
 	"416" =>
 		flushfd(fd);
 		return (array[0] of byte, nil);
 	}
+	flushfd(fd);
+	return (nil, httperror(resp));
 }
 
 parsestats(fd: ref Sys->FD): (array of Stat, string)
@@ -858,7 +867,10 @@ httptransact(req: ref Req): (ref Sys->FD, ref Resp, string)
 		}
 		if(req.method == Http->PROPFIND)
 			case int resp.st {
-			301 or 302 or 303 or 307 =>
+			301 or
+			302 or
+			303 or
+			307 =>
 				if(resp.hasbody(req.method)) {
 					(bfd, berr) := resp.body(hb);
 					if(berr != nil)
@@ -936,8 +948,9 @@ direq(d1, d2: Sys->Dir): int
 readfd(fd: ref Sys->FD): (array of byte, string)
 {
 	d := array[0] of byte;
+	buf := array[Sys->ATOMICIO] of byte;
 	for(;;) {
-		n := sys->read(fd, buf := array[8*1024] of byte, len buf);
+		n := sys->read(fd, buf, len buf);
 		if(n < 0)
 			return (nil, sprint("%r"));
 		if(n == 0)
@@ -952,25 +965,25 @@ readfd(fd: ref Sys->FD): (array of byte, string)
 
 readuser(): string
 {
-	fd := sys->open("/dev/user", Sys->OREAD);
-	if(fd == nil || (n := sys->readn(fd, d := array[128] of byte, len d)) <= 0)
+	n := sys->readn(sys->open("/dev/user", Sys->OREAD), d := array[128] of byte, len d);
+	if(n <= 0)
 		return "none";
 	return string d[:n];
 }
 
 warn(s: string)
 {
-	fprint(fildes(2), "%s\n", s);
+	sys->fprint(sys->fildes(2), "%s\n", s);
 }
 
 say(s: string)
 {
 	if(dflag)
-		fprint(fildes(2), "%s\n", s);
+		warn(s);
 }
 
 fail(s: string)
 {
-	fprint(fildes(2), "%s\n", s);
+	warn(s);
 	raise "fail:"+s;
 }
